@@ -1,0 +1,13 @@
+
+# IDE config
+.idea/
+# Maven build files
+target/
+# Python cache
+__pycache__/
+*.pyc
+# Node.js build files
+node_modules/
+dist/
+# Secrets
+secrets/
