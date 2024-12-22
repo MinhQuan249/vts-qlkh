@@ -2,7 +2,11 @@ package com.example.qlkh;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.client.BufferingClientHttpRequestFactory;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -18,6 +22,15 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowedHeaders("*")
                 .exposedHeaders("Authorization", "Content-Type") // Expose headers if needed
                 .allowCredentials(true);
+    }
+    @Bean
+    public RestTemplate restTemplate() {
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        factory.setBufferRequestBody(true); // Cho phép buffer request body
+        factory.setConnectTimeout(20000);
+        factory.setReadTimeout(60000);
+
+        return new RestTemplate(new BufferingClientHttpRequestFactory(factory));
     }
 }
 

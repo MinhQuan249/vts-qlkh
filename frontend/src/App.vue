@@ -5,6 +5,7 @@
       <router-link to="/customers" class="nav-link">Customer</router-link>
       <router-link to="/employees" class="nav-link">Employee</router-link>
       <router-link to="/contracts" class="nav-link">Contract</router-link>
+      <router-link to="/ocr" class="nav-link">OCR</router-link>
     </nav>
     <!-- Nội dung thay đổi phía dưới -->
     <div class="content">
