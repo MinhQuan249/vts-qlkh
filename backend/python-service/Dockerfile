@@ -3,7 +3,7 @@ FROM python:3.12-slim
 
 # Đặt biến môi trường
 ENV PYTHONUNBUFFERED=1 \
-    PYTHONPATH=/app 
+    PYTHONPATH=/app
 
 # Cài đặt các gói phụ thuộc và Tesseract OCR
 RUN apt-get update && apt-get install -y --no-install-recommends \
