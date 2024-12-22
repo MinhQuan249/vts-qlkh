@@ -10,7 +10,7 @@ services:
       MYSQL_USER: admin
       MYSQL_PASSWORD: Password123!
     volumes:
-      - db_data:/var/lib/mysql            # Lưu dữ liệu database
+      - db_data:/var/lib/mysql # Lưu dữ liệu database
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql # Khởi tạo cơ sở dữ liệu ban đầu
     ports:
       - "3306:3306"
@@ -19,13 +19,13 @@ services:
 
   backend:
     build:
-      context: ./backend                  # Trỏ tới thư mục backend
-      dockerfile: Dockerfile              # Tên file Dockerfile
+      context: ./backend # Trỏ tới thư mục backend
+      dockerfile: Dockerfile # Tên file Dockerfile
     container_name: vts-backend
     restart: always
     depends_on:
-      - database                          # Đảm bảo database khởi động trước
-      - ocr-service 
+      - database # Đảm bảo database khởi động trước
+      - ocr-service
     environment:
       SPRING_DATASOURCE_URL: jdbc:mariadb://database:3306/QLKH
       SPRING_DATASOURCE_USERNAME: admin
@@ -37,22 +37,26 @@ services:
       - qlkh-network
   ocr-service:
     build:
-      context: ./backend/python-service            # Thư mục chứa Dockerfile Flask OCR
+      context: ./backend/python-service
       dockerfile: Dockerfile
     container_name: flask-ocr-service
     restart: always
     ports:
-      - "5000:5000"                       # Mở cổng 5000 cho Flask service
+      - "5000:5000"
+    volumes:
+      - ./secrets:/app/secrets # Mount thư mục secrets vào container
+    environment:
+      GOOGLE_APPLICATION_CREDENTIALS: /app/secrets/vision-key.json
     networks:
       - qlkh-network
   frontend:
     build:
-      context: ./frontend                 # Trỏ tới thư mục frontend
-      dockerfile: Dockerfile              # Tên file Dockerfile
+      context: ./frontend # Trỏ tới thư mục frontend
+      dockerfile: Dockerfile # Tên file Dockerfile
     container_name: vts-frontend
     restart: always
     depends_on:
-      - backend                           # Đảm bảo backend khởi động trước
+      - backend # Đảm bảo backend khởi động trước
     environment:
       VITE_API_URL: http://localhost:8080/api
     ports:
@@ -61,7 +65,8 @@ services:
       - qlkh-network
 
 volumes:
-  db_data:                                # Volume lưu trữ dữ liệu database
+  db_data:
+    # Volume lưu trữ dữ liệu database
 
 networks:
   qlkh-network:

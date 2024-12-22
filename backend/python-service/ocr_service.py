@@ -3,8 +3,9 @@ from utils.image_processing import (
     process_image_conditionally,  # Thay thế preprocess_image
     recognize_text_with_tesseract,
     recognize_text_with_easyocr,
-   # recognize_text_with_google_vision,
-    convert_pdf_to_images
+    recognize_text_with_google_vision,
+    convert_pdf_to_images,
+    recognize_text_with_textract
 )
 import os
 import uuid
@@ -55,10 +56,11 @@ def ocr_service():
 
                 tesseract_result = recognize_text_with_tesseract(processed_image_path)
                 easyocr_result = recognize_text_with_easyocr(processed_image_path)
-               # google_vision_result = recognize_text_with_google_vision(processed_image_path)
+                google_vision_result = recognize_text_with_google_vision(processed_image_path)
+                textract_result = recognize_text_with_textract(processed_image_path)
 
                 # Tính CER và WER nếu có ground truth
-                for result in [tesseract_result, easyocr_result,"""  google_vision_result """]:
+                for result in [tesseract_result, easyocr_result, google_vision_result, textract_result]:
                     if ground_truth:
                         cer_accuracy, cer = calculate_cer(ground_truth, result['text'])
                         wer_accuracy, wer = calculate_wer(ground_truth, result['text'])
@@ -71,7 +73,8 @@ def ocr_service():
                     "page": os.path.basename(image_path),
                     "tesseract": tesseract_result,
                     "easyocr": easyocr_result,
-                   # "google_vision": google_vision_result,
+                    "google_vision": google_vision_result,
+                    "aws_textract": textract_result,
                 })
         else:
             # Xử lý ảnh đơn
@@ -79,9 +82,10 @@ def ocr_service():
 
             tesseract_result = recognize_text_with_tesseract(processed_image_path)
             easyocr_result = recognize_text_with_easyocr(processed_image_path)
-           # google_vision_result = recognize_text_with_google_vision(processed_image_path)
+            google_vision_result = recognize_text_with_google_vision(processed_image_path)
+            textract_result = recognize_text_with_textract(processed_image_path)
 
-            for result in [tesseract_result, easyocr_result, """ google_vision_result """]:
+            for result in [tesseract_result, easyocr_result, google_vision_result, textract_result]:
                 if ground_truth:
                     cer_accuracy, cer = calculate_cer(ground_truth, result['text'])
                     wer_accuracy, wer = calculate_wer(ground_truth, result['text'])
@@ -93,7 +97,8 @@ def ocr_service():
             results.append({
                 "tesseract": tesseract_result,
                 "easyocr": easyocr_result,
-               # "google_vision": google_vision_result,
+                "google_vision": google_vision_result,
+                "aws_textract": textract_result,
             })
 
         return jsonify({"results": results}), 200

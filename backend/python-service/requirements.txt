@@ -8,3 +8,4 @@ torchvision
 numpy
 pdf2image
 google-cloud-vision
+boto3

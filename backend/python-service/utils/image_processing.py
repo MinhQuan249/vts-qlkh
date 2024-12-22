@@ -7,14 +7,28 @@ import os
 import numpy as np
 import uuid
 from pdf2image import convert_from_path
-#from google.cloud import vision
+from google.cloud import vision
 import logging
+import boto3
+import json
 
 # Cấu hình logging
 logging.basicConfig(level=logging.INFO)
 
 # Khởi tạo EasyOCR Reader một lần duy nhất
 reader = easyocr.Reader(['vi', 'en'])
+
+def load_aws_credentials():
+    """
+    Load AWS credentials từ file JSON trong thư mục secrets.
+    """
+    try:
+        with open("secrets/aws_credentials.json", "r") as file:
+            credentials = json.load(file)
+        return credentials
+    except Exception as e:
+        logging.error(f"Could not load AWS credentials: {e}")
+        return None
 
 def convert_pdf_to_images(pdf_path):
     """
@@ -137,40 +151,84 @@ def recognize_text_with_easyocr(image_path):
         logging.error(f"Error in EasyOCR: {str(e)}")
         return {"library": "EasyOCR", "text": f"Error: {str(e)}"}
 
-# def recognize_text_with_google_vision(image_path):
-#     """
-#     Nhận diện văn bản sử dụng Google Vision API.
-#     """
-#     try:
-#         start_time = time.time()
-#
-#         # Tạo client Google Vision
-#         client = vision.ImageAnnotatorClient()
-#
-#         # Đọc ảnh và chuyển thành dạng bytes
-#         with open(image_path, "rb") as image_file:
-#             content = image_file.read()
-#
-#         # Tạo object image từ bytes
-#         image = vision.Image(content=content)
-#
-#         # Gọi Google Vision API
-#         response = client.text_detection(image=image)
-#         texts = response.text_annotations
-#
-#         extracted_text = texts[0].description if texts else ""
-#         confidence = texts[0].score if texts and hasattr(texts[0], "score") else 0
-#
-#         processing_time = round((time.time() - start_time) * 1000)
-#
-#         return {
-#             "library": "Google Vision API",
-#             "text": extracted_text.strip(),
-#             "confidence": f"{confidence * 100:.2f}%",
-#             "time": f"{processing_time} ms",
-#             "handwritingSupport": "Tốt",
-#             "vietnameseSupport": "Có"
-#         }
-#     except Exception as e:
-#         logging.error(f"Error in Google Vision API: {str(e)}")
-#         return {"library": "Google Vision API", "text": f"Error: {str(e)}"}
+def recognize_text_with_google_vision(image_path):
+    """
+    Nhận diện văn bản sử dụng Google Vision API.
+    """
+    try:
+        start_time = time.time()
+
+        # Tạo client Google Vision
+        client = vision.ImageAnnotatorClient()
+
+        # Đọc ảnh và chuyển thành dạng bytes
+        with open(image_path, "rb") as image_file:
+            content = image_file.read()
+
+        # Tạo object image từ bytes
+        image = vision.Image(content=content)
+
+        # Gọi Google Vision API
+        response = client.text_detection(image=image)
+        texts = response.text_annotations
+
+        extracted_text = texts[0].description if texts else ""
+        confidence = texts[0].score if texts and hasattr(texts[0], "score") else 0
+
+        processing_time = round((time.time() - start_time) * 1000)
+
+        return {
+            "library": "Google Vision API",
+            "text": extracted_text.strip(),
+            "confidence": f"{confidence * 100:.2f}%",
+            "time": f"{processing_time} ms",
+            "handwritingSupport": "Tốt",
+            "vietnameseSupport": "Có"
+        }
+    except Exception as e:
+        logging.error(f"Error in Google Vision API: {str(e)}")
+        return {"library": "Google Vision API", "text": f"Error: {str(e)}"}
+
+def recognize_text_with_textract(image_path):
+    """
+    Nhận diện văn bản sử dụng AWS Textract.
+    """
+    credentials = load_aws_credentials()
+    if not credentials:
+        return {"library": "AWS Textract", "text": "Error: Missing AWS credentials"}
+
+    try:
+        # Tạo AWS Textract client
+        textract_client = boto3.client(
+            'textract',
+            aws_access_key_id=credentials['AWS_ACCESS_KEY_ID'],
+            aws_secret_access_key=credentials['AWS_SECRET_ACCESS_KEY'],
+            region_name=credentials['AWS_REGION']
+        )
+
+        # Đọc ảnh và gửi yêu cầu tới Textract
+        with open(image_path, "rb") as image_file:
+            image_bytes = image_file.read()
+
+        start_time = time.time()
+        response = textract_client.detect_document_text(Document={'Bytes': image_bytes})
+        processing_time = round((time.time() - start_time) * 1000)
+
+        # Trích xuất văn bản từ response
+        detected_text = []
+        for block in response['Blocks']:
+            if block['BlockType'] == 'LINE':
+                detected_text.append(block['Text'])
+
+        return {
+            "library": "AWS Textract",
+            "text": "\n".join(detected_text).strip(),
+            "time": f"{processing_time} ms",
+            "cer_accuracy": None,
+            "wer_accuracy": None,
+            "handwritingSupport": "Hạn chế",
+            "vietnameseSupport": "Hạn chế"
+        }
+    except Exception as e:
+        logging.error(f"Error in AWS Textract: {e}")
+        return {"library": "AWS Textract", "text": f"Error: {str(e)}"}

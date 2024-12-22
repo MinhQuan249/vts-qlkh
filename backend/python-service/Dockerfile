@@ -3,8 +3,7 @@ FROM python:3.12-slim
 
 # Đặt biến môi trường
 ENV PYTHONUNBUFFERED=1 \
-    PYTHONPATH=/app \
-    GOOGLE_APPLICATION_CREDENTIALS=/app/keys/vision-key.json
+    PYTHONPATH=/app 
 
 # Cài đặt các gói phụ thuộc và Tesseract OCR
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -25,9 +24,6 @@ RUN mkdir -p /usr/share/tesseract-ocr/5/tessdata/ && \
 
 # Tạo thư mục làm việc
 WORKDIR /app
-
-# Sao chép file credentials vào container
-COPY keys/vision-key.json /app/keys/vision-key.json
 
 # Sao chép requirements và cài đặt thư viện trước
 COPY requirements.txt .
