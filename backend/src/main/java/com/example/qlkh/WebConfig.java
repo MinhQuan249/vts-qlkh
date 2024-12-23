@@ -27,8 +27,8 @@ public class WebConfig implements WebMvcConfigurer {
     public RestTemplate restTemplate() {
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
         factory.setBufferRequestBody(true); // Cho phép buffer request body
-        factory.setConnectTimeout(20000);
-        factory.setReadTimeout(60000);
+        factory.setConnectTimeout(60000);
+        factory.setReadTimeout(200000);
 
         return new RestTemplate(new BufferingClientHttpRequestFactory(factory));
     }

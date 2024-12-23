@@ -16,7 +16,7 @@ import json
 logging.basicConfig(level=logging.INFO)
 
 # Khởi tạo EasyOCR Reader một lần duy nhất
-reader = easyocr.Reader(['vi', 'en'])
+reader = easyocr.Reader(['vi', 'en'], gpu=False)
 
 def load_aws_credentials():
     """
@@ -157,24 +157,17 @@ def recognize_text_with_google_vision(image_path):
     """
     try:
         start_time = time.time()
-
-        # Tạo client Google Vision
         client = vision.ImageAnnotatorClient()
 
-        # Đọc ảnh và chuyển thành dạng bytes
         with open(image_path, "rb") as image_file:
             content = image_file.read()
 
-        # Tạo object image từ bytes
         image = vision.Image(content=content)
-
-        # Gọi Google Vision API
         response = client.text_detection(image=image)
         texts = response.text_annotations
 
         extracted_text = texts[0].description if texts else ""
         confidence = texts[0].score if texts and hasattr(texts[0], "score") else 0
-
         processing_time = round((time.time() - start_time) * 1000)
 
         return {
@@ -198,7 +191,6 @@ def recognize_text_with_textract(image_path):
         return {"library": "AWS Textract", "text": "Error: Missing AWS credentials"}
 
     try:
-        # Tạo AWS Textract client
         textract_client = boto3.client(
             'textract',
             aws_access_key_id=credentials['AWS_ACCESS_KEY_ID'],
@@ -206,7 +198,6 @@ def recognize_text_with_textract(image_path):
             region_name=credentials['AWS_REGION']
         )
 
-        # Đọc ảnh và gửi yêu cầu tới Textract
         with open(image_path, "rb") as image_file:
             image_bytes = image_file.read()
 
@@ -214,7 +205,6 @@ def recognize_text_with_textract(image_path):
         response = textract_client.detect_document_text(Document={'Bytes': image_bytes})
         processing_time = round((time.time() - start_time) * 1000)
 
-        # Trích xuất văn bản từ response
         detected_text = []
         for block in response['Blocks']:
             if block['BlockType'] == 'LINE':
