@@ -78,8 +78,13 @@
 </template>
 
 <script>
-import {addContract ,getContracts, deleteContract, updateContract } from "../services/contractService";
-import axios from "axios";
+import {
+  addContract,
+  getContracts,
+  deleteContract,
+  updateContract,
+} from "../services/contractService";
+import { getCustomers } from "../services/customerService";
 
 export default {
   data() {
@@ -105,8 +110,7 @@ export default {
     },
     async fetchCustomers() {
       try {
-        const response = await axios.get("http://localhost:8080/api/customers"); // Endpoint để lấy danh sách khách hàng
-        this.customers = response.data;
+        this.customers = await getCustomers(); // Sử dụng service để lấy danh sách khách hàng
       } catch (error) {
         console.error("Error fetching customers:", error);
       }
@@ -119,11 +123,15 @@ export default {
       this.newContract = { amount: "", contractDate: "", kh_id: null };
     },
     openEditForm(contract) {
-      this.selectedContract = {...contract, customer: {id: contract.customerId}}; // Ánh xạ customerId
+      this.selectedContract = { ...contract, kh_id: contract.customerId }; // Ánh xạ customerId sang kh_id
     },
     async submitNewContract() {
       try {
-        if (!this.newContract.amount || !this.newContract.contractDate || !this.newContract.kh_id) {
+        if (
+            !this.newContract.amount ||
+            !this.newContract.contractDate ||
+            !this.newContract.kh_id
+        ) {
           alert("Please fill all the required fields!");
           return;
         }
@@ -149,7 +157,7 @@ export default {
         const updatedContract = {
           amount: this.selectedContract.amount,
           contractDate: this.selectedContract.contractDate,
-          customer: {id: this.selectedContract.customer.id}, // Gửi customer ID
+          customerId: this.selectedContract.kh_id, // Gửi customer ID
         };
         await updateContract(this.selectedContract.id, updatedContract);
         alert("Contract updated successfully!");
@@ -180,6 +188,7 @@ export default {
   },
 };
 </script>
+
 
 <style scoped>
 /* CSS giữ nguyên */

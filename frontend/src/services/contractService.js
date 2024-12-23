@@ -13,7 +13,7 @@ export const getContracts = async () => {
 };
 export const addContract = async (contract) => {
     try {
-        const response = await axios.post("http://localhost:8080/api/contracts", contract);
+        const response = await axios.post(API_URL, contract);
         return response.data; // Trả về contractDTO từ backend
     } catch (error) {
         console.error("Error adding contract:", error);

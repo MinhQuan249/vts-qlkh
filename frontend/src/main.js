@@ -10,4 +10,4 @@ app.mount("#app"); // Đảm bảo chỉ gọi `mount` ở đây
 
 import axios from 'axios';
 
-axios.defaults.baseURL = 'http://localhost:8080'; // Địa chỉ của Spring Boot server
+axios.defaults.baseURL = 'https://vts-qlkh-production.up.railway.app'; // Địa chỉ của Spring Boot server

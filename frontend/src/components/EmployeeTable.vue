@@ -85,7 +85,7 @@
 <script>
 import {addEmployee, getEmployees, deleteEmployee, updateEmployee } from "../services/employeeService";
 import axios from "axios";
-
+const BASE_API_URL = import.meta.env.VITE_API_URL;
 export default {
   data() {
     return {
@@ -119,7 +119,7 @@ export default {
     },
     async fetchAvailableCustomers() {
       try {
-        const response = await axios.get("http://localhost:8080/api/customers");
+        const response = await axios.get(`${BASE_API_URL}/customers`);
 
         // Lấy tất cả ID khách hàng đã được gán
         const assignedCustomerIds = new Set(
@@ -182,7 +182,7 @@ export default {
       if (confirm(`Are you sure you want to remove customer "${removedCustomer.name}"?`)) {
         // Gửi yêu cầu cập nhật quan hệ về backend
         axios
-            .delete(`http://localhost:8080/api/employees/${this.selectedEmployee.id}/customers/${removedCustomer.id}`)
+            .delete(`${BASE_API_URL}/employees/${this.selectedEmployee.id}/customers/${removedCustomer.id}`)
             .then(() => {
               // Xóa khách hàng khỏi danh sách của nhân viên trên giao diện
               this.selectedEmployee.customers.splice(index, 1);
