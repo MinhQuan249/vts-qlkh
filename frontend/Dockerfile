@@ -12,9 +12,6 @@ FROM nginx:latest
 # Sao chép thư mục dist vào Nginx
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Sao chép file cấu hình nginx
-COPY nginx.conf /etc/nginx/nginx.conf
-
 # Mở cổng 80
 EXPOSE 80
 
