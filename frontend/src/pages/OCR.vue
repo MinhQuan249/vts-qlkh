@@ -70,9 +70,7 @@
       <table class="ocr-summary">
         <thead>
         <tr>
-          <th>Trang</th>
           <th>Thư viện</th>
-          <th>Văn bản</th>
           <th>Độ chính xác CER</th>
           <th>CER</th>
           <th>Độ chính xác WER</th>
@@ -84,9 +82,7 @@
         </thead>
         <tbody>
         <tr v-for="(result, index) in ocrResults" :key="index">
-          <td>{{ result.page }}</td>
           <td>{{ result.library }}</td>
-          <td>{{ result.text }}</td>
           <td>{{ result.cerAccuracy }}</td>
           <td>{{ result.cer }}</td>
           <td>{{ result.werAccuracy }}</td>
@@ -126,7 +122,7 @@ export default {
   },
   methods: {
     setRotation(angle) {
-      this.rotation = angle; // Cập nhật góc xoay
+      this.rotation = angle;
       this.updatePreviewImage();
     },
     async updatePreviewImage() {
@@ -167,7 +163,6 @@ export default {
       };
       reader.readAsDataURL(this.file);
     },
-
     async rotateImage(image, angle) {
       const canvas = document.createElement("canvas");
       const ctx = canvas.getContext("2d");
@@ -186,7 +181,6 @@ export default {
         });
       });
     },
-
     async handleFileUpload() {
       if (!this.file) {
         alert("Vui lòng chọn một file.");
@@ -201,7 +195,7 @@ export default {
       this.uploadProgress = 0;
 
       try {
-        const response = await axios.post("/api/ocr/upload", formData, {
+        const response = await axios.post("http://localhost:8080/api/ocr/upload", formData, {
           headers: {
             "Content-Type": "multipart/form-data",
           },
@@ -214,9 +208,8 @@ export default {
 
         const rawResults = response.data.results || [];
         this.ocrResults = rawResults.map((result) => ({
-          page: result.page || "N/A",
           library: result.library,
-          text: result.text || "",
+          text: result.text,
           cerAccuracy: result.cer_accuracy || "N/A",
           cer: result.cer || "N/A",
           werAccuracy: result.wer_accuracy || "N/A",

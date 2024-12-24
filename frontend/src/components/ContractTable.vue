@@ -120,10 +120,10 @@ export default {
     },
     closeAddContractModal() {
       this.isAddModalOpen = false;
-      this.newContract = { amount: "", contractDate: "", kh_id: null };
+      this.newContract = {amount: "", contractDate: "", kh_id: null};
     },
     openEditForm(contract) {
-      this.selectedContract = { ...contract, kh_id: contract.customerId }; // Ánh xạ customerId sang kh_id
+      this.selectedContract = {...contract, kh_id: contract.customerId}; // Ánh xạ customerId sang kh_id
     },
     async submitNewContract() {
       try {

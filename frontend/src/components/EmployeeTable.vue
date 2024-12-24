@@ -138,7 +138,6 @@ export default {
     },
 
 
-
     openEditForm(employee) {
       this.selectedEmployee = JSON.parse(JSON.stringify(employee)); // Deep copy
     },
@@ -246,9 +245,11 @@ export default {
   border-radius: 8px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
+
 .modal label {
   margin-left: 5px;
 }
+
 .modal input {
   margin-left: 5px;
   text-size: 15px;
@@ -260,9 +261,11 @@ table {
   border-collapse: collapse;
   margin-bottom: 1.5rem;
 }
+
 h2 {
   color: #3498db;
 }
+
 th, td {
   padding: 0.5rem 1rem;
   text-align: left;
@@ -280,9 +283,11 @@ button {
   border: none;
   cursor: pointer;
 }
-.option{
+
+.option {
   color: #181818;
 }
+
 .edit-form {
   background-color: bisque;
   padding: 20px;
