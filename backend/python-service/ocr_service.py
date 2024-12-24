@@ -1,6 +1,5 @@
 from flask import Flask, request, jsonify
 from utils.image_processing import (
-    process_image_conditionally,
     recognize_text_with_tesseract,
     recognize_text_with_easyocr,
     recognize_text_with_google_vision,
@@ -48,16 +47,13 @@ def ocr_service():
         results = []
 
         if file.filename.endswith('.pdf'):
-            # Xử lý PDF
             image_paths = convert_pdf_to_images(file_path)
             for image_path in image_paths:
-                processed_image_path = process_image_conditionally(image_path)
-
                 ocr_results = [
-                    recognize_text_with_tesseract(processed_image_path),
-                    recognize_text_with_easyocr(processed_image_path),
-                    recognize_text_with_google_vision(processed_image_path),
-                    recognize_text_with_textract(processed_image_path)
+                    recognize_text_with_tesseract(image_path),
+                    recognize_text_with_easyocr(image_path),
+                    recognize_text_with_google_vision(image_path),
+                    recognize_text_with_textract(image_path)
                 ]
 
                 for result in ocr_results:
@@ -71,19 +67,13 @@ def ocr_service():
                             'wer': f"{wer}"
                         })
 
-                    # Thêm thông tin `page` vào từng kết quả
-                    result["page"] = os.path.basename(image_path)
-
-                results.extend(ocr_results)
+                results.append({"page": os.path.basename(image_path), "results": ocr_results})
         else:
-            # Xử lý ảnh đơn
-            processed_image_path = process_image_conditionally(file_path)
-
             ocr_results = [
-                recognize_text_with_tesseract(processed_image_path),
-                recognize_text_with_easyocr(processed_image_path),
-                recognize_text_with_google_vision(processed_image_path),
-                recognize_text_with_textract(processed_image_path)
+                recognize_text_with_tesseract(file_path),
+                recognize_text_with_easyocr(file_path),
+                recognize_text_with_google_vision(file_path),
+                recognize_text_with_textract(file_path)
             ]
 
             for result in ocr_results:
@@ -97,10 +87,7 @@ def ocr_service():
                         'wer': f"{wer}"
                     })
 
-                # Thêm thông tin `page` là "single_image" vào từng kết quả
-                result["page"] = "single_image"
-
-            results = ocr_results
+            results.extend(ocr_results)
 
         return jsonify({"results": results}), 200
 
