@@ -48,53 +48,59 @@ def ocr_service():
         results = []
 
         if file.filename.endswith('.pdf'):
-                    # Xử lý PDF
-                    image_paths = convert_pdf_to_images(file_path)
-                    for image_path in image_paths:
-                        processed_image_path = process_image_conditionally(image_path)
+            # Xử lý PDF
+            image_paths = convert_pdf_to_images(file_path)
+            for image_path in image_paths:
+                processed_image_path = process_image_conditionally(image_path)
 
-                        ocr_results = [
-                            recognize_text_with_tesseract(processed_image_path),
-                            recognize_text_with_easyocr(processed_image_path),
-                            recognize_text_with_google_vision(processed_image_path),
-                            recognize_text_with_textract(processed_image_path)
-                        ]
+                ocr_results = [
+                    recognize_text_with_tesseract(processed_image_path),
+                    recognize_text_with_easyocr(processed_image_path),
+                    recognize_text_with_google_vision(processed_image_path),
+                    recognize_text_with_textract(processed_image_path)
+                ]
 
-                        for result in ocr_results:
-                            if ground_truth:
-                                cer_accuracy, cer = calculate_cer(ground_truth, result['text'])
-                                wer_accuracy, wer = calculate_wer(ground_truth, result['text'])
-                                result.update({
-                                    'cer_accuracy': f"{cer_accuracy}%",
-                                    'cer': f"{cer}",
-                                    'wer_accuracy': f"{wer_accuracy}%",
-                                    'wer': f"{wer}"
-                                })
+                for result in ocr_results:
+                    if ground_truth:
+                        cer_accuracy, cer = calculate_cer(ground_truth, result['text'])
+                        wer_accuracy, wer = calculate_wer(ground_truth, result['text'])
+                        result.update({
+                            'cer_accuracy': f"{cer_accuracy}%",
+                            'cer': f"{cer}",
+                            'wer_accuracy': f"{wer_accuracy}%",
+                            'wer': f"{wer}"
+                        })
 
-                        results.append({"page": os.path.basename(image_path), "results": ocr_results})
-                else:
-                    # Xử lý ảnh đơn
-                    processed_image_path = process_image_conditionally(file_path)
+                    # Thêm thông tin `page` vào từng kết quả
+                    result["page"] = os.path.basename(image_path)
 
-                    ocr_results = [
-                        recognize_text_with_tesseract(processed_image_path),
-                        recognize_text_with_easyocr(processed_image_path),
-                        recognize_text_with_google_vision(processed_image_path),
-                        recognize_text_with_textract(processed_image_path)
-                    ]
+                results.extend(ocr_results)
+        else:
+            # Xử lý ảnh đơn
+            processed_image_path = process_image_conditionally(file_path)
 
-                    for result in ocr_results:
-                        if ground_truth:
-                            cer_accuracy, cer = calculate_cer(ground_truth, result['text'])
-                            wer_accuracy, wer = calculate_wer(ground_truth, result['text'])
-                            result.update({
-                                'cer_accuracy': f"{cer_accuracy}%",
-                                'cer': f"{cer}",
-                                'wer_accuracy': f"{wer_accuracy}%",
-                                'wer': f"{wer}"
-                            })
+            ocr_results = [
+                recognize_text_with_tesseract(processed_image_path),
+                recognize_text_with_easyocr(processed_image_path),
+                recognize_text_with_google_vision(processed_image_path),
+                recognize_text_with_textract(processed_image_path)
+            ]
 
-                    results = ocr_results
+            for result in ocr_results:
+                if ground_truth:
+                    cer_accuracy, cer = calculate_cer(ground_truth, result['text'])
+                    wer_accuracy, wer = calculate_wer(ground_truth, result['text'])
+                    result.update({
+                        'cer_accuracy': f"{cer_accuracy}%",
+                        'cer': f"{cer}",
+                        'wer_accuracy': f"{wer_accuracy}%",
+                        'wer': f"{wer}"
+                    })
+
+                # Thêm thông tin `page` là "single_image" vào từng kết quả
+                result["page"] = "single_image"
+
+            results = ocr_results
 
         return jsonify({"results": results}), 200
 
