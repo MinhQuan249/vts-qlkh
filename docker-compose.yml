@@ -10,8 +10,8 @@ services:
       MYSQL_USER: admin
       MYSQL_PASSWORD: Password123!
     volumes:
-      - db_data:/var/lib/mysql # Lưu dữ liệu database
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql # Khởi tạo cơ sở dữ liệu ban đầu
+      - db_data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
       - ./data.sql:/docker-entrypoint-initdb.d/data.sql
     ports:
       - "3306:3306"
@@ -20,22 +20,21 @@ services:
 
   backend:
     build:
-      context: ./backend # Trỏ tới thư mục backend
-      dockerfile: Dockerfile # Tên file Dockerfile
+      context: ./backend
+      dockerfile: Dockerfile
     container_name: vts-backend
     restart: always
     depends_on:
-      - database # Đảm bảo database khởi động trước
+      - database
       - ocr-service
     environment:
       SPRING_DATASOURCE_URL: jdbc:mariadb://database:3306/QLKH
       SPRING_DATASOURCE_USERNAME: admin
       SPRING_DATASOURCE_PASSWORD: Password123!
-      OCR_SERVICE_URL: http://ocr-service:5000/ocr/upload # URL kết nối tới Flask OCR
-    ports:
-      - "8080:8080"
+      OCR_SERVICE_URL: http://ocr-service:5000/ocr/upload
     networks:
       - qlkh-network
+
   ocr-service:
     build:
       context: ./backend/python-service
@@ -45,29 +44,41 @@ services:
     ports:
       - "5000:5000"
     volumes:
-      - ./secrets:/app/secrets # Mount thư mục secrets vào container
+      - ./secrets:/app/secrets
     environment:
       GOOGLE_APPLICATION_CREDENTIALS: /app/secrets/vision-key.json
     networks:
       - qlkh-network
+
   frontend:
     build:
-      context: ./frontend # Trỏ tới thư mục frontend
-      dockerfile: Dockerfile # Tên file Dockerfile
+      context: ./frontend
+      dockerfile: Dockerfile
     container_name: vts-frontend
     restart: always
     depends_on:
-      - backend # Đảm bảo backend khởi động trước
+      - backend
     environment:
-      VITE_API_URL: http://localhost:8080/api
+      VITE_API_URL: /api 
+    networks:
+      - qlkh-network
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx-proxy
+    restart: always
+    depends_on:
+      - frontend
+      - backend
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
     ports:
-      - "3000:80" # Kết nối cổng 80 trong container (Nginx) sang cổng 3000 trên host
+      - "80:80"
     networks:
       - qlkh-network
 
 volumes:
   db_data:
-    # Volume lưu trữ dữ liệu database
 
 networks:
   qlkh-network:
