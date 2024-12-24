@@ -70,7 +70,9 @@
       <table class="ocr-summary">
         <thead>
         <tr>
+          <th>Trang</th>
           <th>Thư viện</th>
+          <th>Văn bản</th>
           <th>Độ chính xác CER</th>
           <th>CER</th>
           <th>Độ chính xác WER</th>
@@ -82,11 +84,13 @@
         </thead>
         <tbody>
         <tr v-for="(result, index) in ocrResults" :key="index">
+          <td>{{ result.page }}</td>
           <td>{{ result.library }}</td>
-          <td>{{ result.cerAccuracy || "N/A" }}</td>
-          <td>{{ result.cer || "N/A" }}</td>
-          <td>{{ result.werAccuracy || "N/A" }}</td>
-          <td>{{ result.wer || "N/A" }}</td>
+          <td>{{ result.text }}</td>
+          <td>{{ result.cerAccuracy }}</td>
+          <td>{{ result.cer }}</td>
+          <td>{{ result.werAccuracy }}</td>
+          <td>{{ result.wer }}</td>
           <td>{{ result.handwritingSupport }}</td>
           <td>{{ result.vietnameseSupport }}</td>
           <td>{{ result.time }}</td>
@@ -209,19 +213,18 @@ export default {
         });
 
         const rawResults = response.data.results || [];
-        this.ocrResults = rawResults.map((result) => {
-          return Object.keys(result).map((key) => ({
-            library: result[key].library,
-            text: result[key].text,
-            cerAccuracy: result[key].cer_accuracy,
-            cer: result[key].cer,
-            werAccuracy: result[key].wer_accuracy,
-            wer: result[key].wer,
-            handwritingSupport: result[key].handwritingSupport,
-            vietnameseSupport: result[key].vietnameseSupport,
-            time: result[key].time,
-          }));
-        }).flat();
+        this.ocrResults = rawResults.map((result) => ({
+          page: result.page || "N/A",
+          library: result.library,
+          text: result.text || "",
+          cerAccuracy: result.cer_accuracy || "N/A",
+          cer: result.cer || "N/A",
+          werAccuracy: result.wer_accuracy || "N/A",
+          wer: result.wer || "N/A",
+          handwritingSupport: result.handwritingSupport || "N/A",
+          vietnameseSupport: result.vietnameseSupport || "N/A",
+          time: result.time || "N/A",
+        }));
 
         console.log("OCR Results Processed:", this.ocrResults);
       } catch (error) {
