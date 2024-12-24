@@ -12,6 +12,7 @@ services:
     volumes:
       - db_data:/var/lib/mysql # Lưu dữ liệu database
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql # Khởi tạo cơ sở dữ liệu ban đầu
+      - ./data.sql:/docker-entrypoint-initdb.d/data.sql
     ports:
       - "3306:3306"
     networks:
